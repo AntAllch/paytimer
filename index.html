@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ants Pay Timer</title>
+
+</head>
+
+<body>
+
+    <h1>Ant's Pay Timer</h3>
+
+    <form id="earningsForm">
+
+        <label for="shiftHours">Shift Duration (Hours):</label>
+        <input type="number" id="shiftHours" steps="0.1" required><br><br>
+
+        <label for="hourlyWage">Hourly Pay:</label>
+        <input type="number" id="hourlyWage" steps="0.1" required><br><br>
+
+        <label for="breakStart">Unpaid Break Start (Hours from start of shift):</label>
+        <input type="number" id="breakStart" steps="0.1"><br><br>
+
+        <label for="breakEnd">Unpaid Break End (Hours from start of shift):</label>
+        <input type="number" id="breakEnd" steps="0.1"><br><br>
+
+        <button type="submit">Start Timer</button>
+        <button type="button" id="stopTracker" disabled>End Timer</button>
+        
+    </form>
+
+    <h2 id="earningsDisplay">Earnings: £0.00</h2>
+
+    <h2 id="timer">Time Remaining: 0:00:00</h2>
+
+  <script>
+
+    const earningsForm = document.getElementById('earningsForm');
+    const stopTrackerButton = document.getElementById('stopTracker');
+    const earningsDisplay = document.getElementById('earningsDisplay');
+    const timerDisplay = document.getElementById('timer');
+
+    let earningsInterval;
+    let countdownInterval;
+
+    earningsForm.addEventListener('submit', function(e) {
+        //prevents page from refreshing
+        e.preventDefault();
+
+        //get the user inputs
+        const shiftHours = parseFloat(document.getElementById('shiftHours').value);
+        const hourlyWage = parseFloat(document.getElementById('hourlyWage').value);
+        const breakStart = parseFloat(document.getElementById('breakStart').value) || 0;
+        const breakEnd = parseFloat(document.getElementById('breakEnd').value) || 0;
+
+        //convert into seconds
+        const shiftSeconds = shiftHours * 3600;
+        const breakStartSeconds = breakStart * 3600;
+        const breakEndSeconds = breakEnd * 3600;
+
+        //earnings per second
+        const earningsPerSecond = hourlyWage / 3600;
+
+        //set default values
+        let currentEarnings = 0;
+        let secondsElapsed = 0;
+        let remainingSeconds = shiftSeconds;
+        let isOnBreak = false;
+
+        stopTrackerButton.disabled = false;
+
+        //start countdown timer
+        countdownInterval = setInterval(() => {
+
+            if(remainingSeconds > 0){
+
+                remainingSeconds--;
+                const hours = Math.floor(remainingSeconds / 3600);
+                const minutes = Math.floor((remainingSeconds % 3600) / 60);
+                const seconds = remainingSeconds % 60;
+                timerDisplay.textContent = `Time Remaining: ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
+                console.log("Earnings updated");
+
+            } else {
+                clearInterval(countdownInterval);
+            }
+
+        }, 1000);
+
+        //start earnings tracker
+        earningsInterval = setInterval(() => {
+
+            //while the timer is less than the shift hours in seconds
+            if(secondsElapsed < shiftSeconds){
+                
+                //check if on break
+                if (secondsElapsed >= breakStartSeconds && secondsElapsed < breakSeconds){
+                    isOnBreak = true;
+                } else {
+                    isOnBreak = false;
+                }
+
+                //check if NOT on break
+                if(!isOnBreak){
+                    currentEarnings += earningsPerSecond;
+                    earningsDisplay.textContent = `Earnings: ${currentEarnings.toFixed(2)}`;
+                }
+    
+                secondsElapsed++;
+
+            } else {
+                clearInterval(earningsInterval);
+                stopTrackerButton.disabled = true;
+            }
+
+        }, 1000);
+
+    });
+
+  </script>
+
+</body>
+</html>

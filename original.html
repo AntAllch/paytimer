@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earnings Tracker</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    h1, h2 {
+      color: #333;
+    }
+    #timer {
+      font-size: 1.5em;
+      color: #555;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Earnings Tracker</h1>
+
+  <form id="earningsForm">
+    <label for="shiftHours">Shift Duration (hours):</label>
+    <input type="number" id="shiftHours" step="0.1" required><br><br>
+
+    <label for="hourlyWage">Hourly Wage:</label>
+    <input type="number" id="hourlyWage" step="0.01" required><br><br>
+
+    <label for="breakStart">Unpaid Break Start (hours from start):</label>
+    <input type="number" id="breakStart" step="0.1"><br><br>
+
+    <label for="breakEnd">Unpaid Break End (hours from start):</label>
+    <input type="number" id="breakEnd" step="0.1"><br><br>
+
+    <button type="submit">Start Tracker</button>
+    <button type="button" id="stopTracker" disabled>Stop Tracker</button>
+    
+  </form>
+
+  <h2 id="earningsDisplay">Earnings: $0.00</h2>
+  
+  <h2 id="timer">Time Remaining: 00:00:00</h2>
+
+  <script>
+
+    const earningsForm = document.getElementById('earningsForm');
+    const stopTrackerButton = document.getElementById('stopTracker');
+    const earningsDisplay = document.getElementById('earningsDisplay');
+    const timerDisplay = document.getElementById('timer');
+
+    let interval;
+    let countdownInterval;
+
+    earningsForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // Get user inputs
+      const shiftHours = parseFloat(document.getElementById('shiftHours').value);
+      const hourlyWage = parseFloat(document.getElementById('hourlyWage').value);
+      const breakStart = parseFloat(document.getElementById('breakStart').value) || 0;
+      const breakEnd = parseFloat(document.getElementById('breakEnd').value) || 0;
+
+      // Calculate total shift seconds including break time
+      const shiftSeconds = shiftHours * 3600;
+      const breakStartSeconds = breakStart * 3600;
+      const breakEndSeconds = breakEnd * 3600;
+
+      // Earnings per second
+      const earningsPerSecond = hourlyWage / 3600;
+
+      // Initialize tracking variables
+      let currentEarnings = 0;
+      let secondsElapsed = 0;
+      let remainingSeconds = shiftSeconds;
+      let isOnBreak = false;
+
+      // Enable Stop Tracker button
+      stopTrackerButton.disabled = false;
+
+      // Start countdown timer
+      countdownInterval = setInterval(() => {
+
+        if (remainingSeconds > 0) {
+
+          remainingSeconds--;
+          const hours = Math.floor(remainingSeconds / 3600);
+          const minutes = Math.floor((remainingSeconds % 3600) / 60);
+          const seconds = remainingSeconds % 60;
+          timerDisplay.textContent = `Time Remaining: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+          console.log("Earnings updated");
+
+        } else {
+          clearInterval(countdownInterval);
+        }
+        
+      }, 1000);
+
+
+
+
+
+
+
+
+      
+      // Start earnings tracker
+      interval = setInterval(() => {
+
+        //while the timer is less than the shift hours in seconds
+        if (secondsElapsed < shiftSeconds) {
+
+          //if the timer HAS entered the break start hours
+          if (secondsElapsed >= breakStartSeconds && secondsElapsed < breakEndSeconds) {
+            isOnBreak = true;
+          } else {
+            isOnBreak = false;
+          }
+
+          //if the timer has NOT entered the break start hours
+          if (!isOnBreak) {
+            currentEarnings += earningsPerSecond;
+            earningsDisplay.textContent = `Earnings: $${currentEarnings.toFixed(2)}`;
+          }
+          //adds 1 to the variable
+          secondsElapsed++;
+
+        } else {
+          clearInterval(interval); // Stop once shift time is over
+          stopTrackerButton.disabled = true;
+        }
+      }, 1000);
+
+    });
+
+
+
+
+
+
+
+
+
+
+
+
+    stopTrackerButton.addEventListener('click', function() {
+      clearInterval(interval);
+      clearInterval(countdownInterval);
+      stopTrackerButton.disabled = true;
+    });
+
+  </script>
+</body>
+</html>
+
+        
+    
