@@ -14,16 +14,16 @@
     <form id="earningsForm">
 
         <label for="shiftHours">Shift Duration (Hours):</label>
-        <input type="number" id="shiftHours" steps="0.1" required><br><br>
+        <input type="number" id="shiftHours" step="0.1" required><br><br>
 
         <label for="hourlyWage">Hourly Pay:</label>
-        <input type="number" id="hourlyWage" steps="0.1" required><br><br>
+        <input type="number" id="hourlyWage" step="0.1" required><br><br>
 
         <label for="breakStart">Unpaid Break Start (Hours from start of shift):</label>
-        <input type="number" id="breakStart" steps="0.1"><br><br>
+        <input type="number" id="breakStart" step="0.1"><br><br>
 
         <label for="breakEnd">Unpaid Break End (Hours from start of shift):</label>
-        <input type="number" id="breakEnd" steps="0.1"><br><br>
+        <input type="number" id="breakEnd" step="0.1"><br><br>
 
         <button type="submit">Start Timer</button>
         <button type="button" id="stopTracker" disabled>End Timer</button>
@@ -71,22 +71,21 @@
         stopTrackerButton.disabled = false;
 
         //start countdown timer
-        countdownInterval = setInterval(() => {
+        // countdownInterval = setInterval(() => {
 
-            if(remainingSeconds > 0){
+        //     if(remainingSeconds > 0){
 
-                remainingSeconds--;
-                const hours = Math.floor(remainingSeconds / 3600);
-                const minutes = Math.floor((remainingSeconds % 3600) / 60);
-                const seconds = remainingSeconds % 60;
-                timerDisplay.textContent = `Time Remaining: ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
-                console.log("Earnings updated");
+        //         remainingSeconds--;
+        //         const hours = Math.floor(remainingSeconds / 3600);
+        //         const minutes = Math.floor((remainingSeconds % 3600) / 60);
+        //         const seconds = remainingSeconds % 60;
+        //         timerDisplay.textContent = `Time Remaining: ${hours.toString().padStart(2,'0')}:${minutes.toString().padStart(2,'0')}:${seconds.toString().padStart(2,'0')}`;
 
-            } else {
-                clearInterval(countdownInterval);
-            }
+        //     } else {
+        //         clearInterval(countdownInterval);
+        //     }
 
-        }, 1000);
+        // }, 1000);
 
         //start earnings tracker
         earningsInterval = setInterval(() => {
@@ -95,7 +94,7 @@
             if(secondsElapsed < shiftSeconds){
                 
                 //check if on break
-                if (secondsElapsed >= breakStartSeconds && secondsElapsed < breakSeconds){
+                if (secondsElapsed >= breakStartSeconds && secondsElapsed < breakEndSeconds){
                     isOnBreak = true;
                 } else {
                     isOnBreak = false;
@@ -104,7 +103,8 @@
                 //check if NOT on break
                 if(!isOnBreak){
                     currentEarnings += earningsPerSecond;
-                    earningsDisplay.textContent = `Earnings: ${currentEarnings.toFixed(2)}`;
+                    earningsDisplay.textContent = `Earnings: £${currentEarnings.toFixed(2)}`;
+                    console.log("Earnings updated");
                 }
     
                 secondsElapsed++;
@@ -112,10 +112,18 @@
             } else {
                 clearInterval(earningsInterval);
                 stopTrackerButton.disabled = true;
+                console.log("Timer ended");
             }
 
         }, 1000);
 
+    });
+
+    stopTrackerButton.addEventListener('click', () => {
+        clearInterval(earningsInterval);
+        clearInterval(countdownInterval);
+        earningsDisplay.textContent = 'Earnings: £0.00';
+        timerDisplay.textContent = 'Time Remaining: 0:00:00';
     });
 
   </script>
